@@ -1,0 +1,80 @@
+<div class="content">
+   <h3 style="color:#a4a4a4">Details</h3>
+   <div class="thumbnail_container">
+      <a href="<%= video_details.video_url%>" target="_blank">
+         <img id="thumbnail" src="data:image/png;base64,<%= thumbnail_b64 %>" alt="Thumbnail">
+      </a>
+   </div>
+   <div class="video_information">
+      <h4>
+         <%= video_details.title %>
+      </h4>
+   </div>
+   <div class="error_msg"></div>
+   <div class="info_msg"></div>
+   <h3 style="color:#a4a4a4">Available quality:</h2>
+   <ul id="parent-list">
+      <% video_format.forEach((element)=>{%>
+         <li id="child-list">
+            <%=element.qualityLabel%> (<%=element.width%>x<%=element.height%>)
+            <br>
+            <button type="submit" class="downloadButton" name="qualbutton" value='{"itag":<%= element.itag %>,"videoID":"<%= video_details.videoId%>"}'>Download</button>
+         </li>
+         <% }); %>
+      </ul>
+</div>
+<script>
+   var Done = false;
+   function sendStatusReq(data, successCallback, errorCallback) {
+      $.ajax({
+         url: "/fetch_token",
+         type: 'POST',
+         data: data,
+         success: successCallback,
+         error: errorCallback
+      });
+   }
+   function sendErrorMsg(xhr, status, error) {
+      PopError(xhr.responseJSON?.code || "An unknown error occured")
+      $(".info_msg").hide();
+      Done = true;
+   }
+   function sendSuccessMsg(response, textStatus, xhr) {
+      var msg = response;
+      if (msg?.code == "queued") {
+         $(".info_msg").show().text("Video queued for processing");
+      } else if (msg?.code == "processing") {
+         $(".info_msg").show().text(`${msg.status.assumedProgress.status} - ${msg.status.assumedProgress.progress}%`);
+      } else if (msg?.token) {
+         $(".info_msg").show().text("Started download... it should be initiated by your browser");
+         Done = true;
+         let token = msg.token;
+         let target = `/video/dllink?sid=${token}`;
+         window.location = target;
+      } 
+   }
+   function StopWait() {
+      $('.downloadButton').prop('disabled', false);
+      Done = true;
+   }
+   function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+   }
+   $(document).ready(function(){
+    $('.downloadButton').click(async function(event) {
+      Done = false;
+      event.preventDefault();
+      var jsonValue = JSON.parse($(this).val());
+      $('.downloadButton').prop('disabled', true);
+      for (var i = 0; i < 90; i++) {
+         if (Done){
+            $('.downloadButton').prop('disabled', false);
+            return;
+         }
+         sendStatusReq(jsonValue, sendSuccessMsg, sendErrorMsg)
+         await sleep(1500)
+      }
+      
+      });
+   });
+</script>

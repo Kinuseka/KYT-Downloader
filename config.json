@@ -1,0 +1,11 @@
+{
+  "SECRET_SESSION": "[generate your own secret]",
+  "SECRET_TOKEN": "[generate your own secret]",
+  "Cache_size_GB": 10,
+  "Maximum_size_GB": 0.5,
+  "Longest_time_HR": 5,
+  "redis": {
+		"host": "127.0.0.1",
+		"port": 6379
+	}
+}
