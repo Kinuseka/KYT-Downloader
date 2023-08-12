@@ -13,25 +13,34 @@
    <div class="error_msg"></div>
    <div class="info_msg"></div>
    <h3 style="color:#a4a4a4">Available quality:</h2>
-   <ul id="parent-list">
-      <% video_format.forEach((element)=>{%>
-         <li id="child-list">
-            <%=element.qualityLabel%> (<%=element.width%>x<%=element.height%>)
-            <br>
-            <button type="submit" class="downloadButton" name="qualbutton" value='{"itag":<%= element.itag %>,"videoID":"<%= video_details.videoId%>"}'>Download</button>
-         </li>
-         <% }); %>
+      <ul id="parent-list">
+         <% video_format.forEach((element)=>{%>
+            <li id="child-list">
+               <%=element.qualityLabel%> (<%=element.width%>x<%=element.height%>)
+                        <br>
+                        <button type="submit" class="downloadButton" name="qualbutton"
+                           value='{"itag":<%= element.itag %>,"videoID":"<%= video_details.videoId%>"}'>Download</button>
+            </li>
+            <% }); %>
       </ul>
 </div>
 <script>
    var Done = false;
    function sendStatusReq(data, successCallback, errorCallback) {
-      $.ajax({
-         url: "/fetch_token",
-         type: 'POST',
-         data: data,
-         success: successCallback,
-         error: errorCallback
+      return new Promise((resolve, reject) => {
+         $.ajax({
+            url: "/fetch_token",
+            type: 'POST',
+            data: data,
+            success: (resp) => {
+               successCallback(resp);
+               resolve(resp);
+            },
+            error: (xhr, status, error) => {
+               errorCallback(xhr, status, error);
+               reject * (error);
+            }
+         });
       });
    }
    function sendErrorMsg(xhr, status, error) {
@@ -51,7 +60,7 @@
          let token = msg.token;
          let target = `/video/dllink?sid=${token}`;
          window.location = target;
-      } 
+      }
    }
    function StopWait() {
       $('.downloadButton').prop('disabled', false);
@@ -60,21 +69,20 @@
    function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
    }
-   $(document).ready(function(){
-    $('.downloadButton').click(async function(event) {
-      Done = false;
-      event.preventDefault();
-      var jsonValue = JSON.parse($(this).val());
-      $('.downloadButton').prop('disabled', true);
-      for (var i = 0; i < 90; i++) {
-         if (Done){
-            $('.downloadButton').prop('disabled', false);
-            return;
+   $(document).ready(function () {
+      $('.downloadButton').click(async function (event) {
+         Done = false;
+         event.preventDefault();
+         var jsonValue = JSON.parse($(this).val());
+         $('.downloadButton').prop('disabled', true);
+         for (var i = 0; i < 90; i++) {
+            if (Done) {
+               $('.downloadButton').prop('disabled', false);
+               return;
+            }
+            await sendStatusReq(jsonValue, sendSuccessMsg, sendErrorMsg);
+            await sleep(1500);
          }
-         sendStatusReq(jsonValue, sendSuccessMsg, sendErrorMsg)
-         await sleep(1500)
-      }
-      
       });
    });
 </script>

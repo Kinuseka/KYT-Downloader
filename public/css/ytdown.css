@@ -18,6 +18,19 @@ body {
    margin-left: 15rem;
 }
 
+.Lowerbody {
+    background-color: rgb(44, 44, 44);
+    margin: 4px auto;
+    position: relative;
+    padding: 1em;
+    border-radius: 20px;
+    max-width:750px;
+}
+.Lowerbody p {
+    margin-left: 17rem;
+
+}
+
 .Forms {
     margin: 4px auto;
     position: relative;
@@ -74,4 +87,13 @@ a:visited {
 
 #child-list {
     margin:10px auto;
+}
+#dark{
+    color:#93959d;
+}
+#dark a:hover{
+    color:#3e4985;
+}
+#dark a:visited{
+    color:#3c2323;
 }
