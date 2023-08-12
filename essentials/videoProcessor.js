@@ -11,7 +11,6 @@ const MAX_CACHE = config_file.Cache_size_GB/*gb*/ * (1024 * 1024 * 1024);
 
 function getFileBytes(filename) {
   try {
-
     var stats = fs.statSync(filename);
     var fileSizeInBytes = stats.size;
     return fileSizeInBytes;
@@ -114,7 +113,6 @@ function GetJobFromID(VideoID){
   let job = CombineQueue.getJob(VideoID);
   return job
 }
-
 
 function videoFetch(VideoID, itag, saveto){
     let fileStream = fs.createWriteStream(saveto);
