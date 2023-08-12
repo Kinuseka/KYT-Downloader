@@ -61,7 +61,7 @@ async function cleanCache(newFileSize, cacheDirectory) {
       }
     }
     return false
-  }
+}
 
 async function VideoProcess(VideoID, itag, meta, audio){
     var FinalID = itag+VideoID;
@@ -71,13 +71,10 @@ async function VideoProcess(VideoID, itag, meta, audio){
     fileDone = path.join(dir, assumedFile);
     fileDir = path.join(dir,assumedMP4);
     filemp3 = path.join(dir,assumedMP3);
-    console.log(VideoID, audio, meta.contentLength)
-    console.log(VideoID, itag, fileDone)
     //If file exists then check if the size of the file matches on what the api says
     //if not redownload the file, if it matches then keep using the file
     let job = await CombineQueue.jobFind(FinalID);
     let jobstate = await job?.getState() || null;
-    console.log(jobstate)
     if (jobstate == "active") {
       console.log('[KYT-VideoProcessor] Existing job found but still active', FinalID);
       let state = {assumedProgress: job.progress, jobQueue: jobstate};
@@ -120,7 +117,7 @@ function videoFetch(VideoID, itag, saveto){
     videoPipe.pipe(fileStream);
     return videoPipe
     
-  }
+}
 function audioFetch(VideoID, itag, saveto){
     let fileStream = fs.createWriteStream(saveto);
     let audioPipe = ytdl(VideoID, {quality: parseInt(itag)});
@@ -133,7 +130,7 @@ function PerformisePiper(target, callback, size=null, ...args) {
         const pipe = target(...args);
         var totalSize = size || 0;
         var dataRead = 0;
-        var totaltime;
+        var totalTime;
         pipe.on('response', resp=>{
           resp.on('data', function(data) {
             dataRead += data.length;
