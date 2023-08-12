@@ -29,6 +29,7 @@ Feel free to increase/decrease the maximum values on the config.json depending o
 **To run it on a different port:**
 `PORT=XXXX npm run prod` 
 
-# Notes:
-It is highly recommended to run this under a reverse proxy like *NGINX*
-
+# Notes and Disclaimer:
+* It is highly recommended to run this under a reverse proxy like *NGINX*.
+* The speed of the downloader soley depends on the specifications of your server or the device which are used to host this service on.
+* This project was made with an intention to learn the intricacies of this programming language, any malicious activties that is somehow related to the usage of this project is not of an intent to the author and should soley be the responsibility of the user.
