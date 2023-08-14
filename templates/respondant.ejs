@@ -38,7 +38,7 @@
             },
             error: (xhr, status, error) => {
                errorCallback(xhr, status, error);
-               reject * (error);
+               resolve(error); //force resolve even if error
             }
          });
       });

@@ -106,6 +106,8 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
             console.log('[KYT Downloader] Job done successfully, send token');
             let token = createToken(tokenData,"4h");
             res.json({token:token})
+        } else {
+            res.json({"code": "Unknown response, this might be a bug"})
         }
     }).catch(err => {
         console.log(err)
