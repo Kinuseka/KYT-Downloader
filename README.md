@@ -8,6 +8,7 @@ Live Instance: https://kinuseka.us/video
 ## Clone repo and install packages:
 ```
 git clone https://github.com/Kinuseka/KYT-Downloader.git
+cd KYT-Downloader
 npm i
 ```
 ## Install dependencies:
