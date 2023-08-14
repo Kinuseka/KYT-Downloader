@@ -1,5 +1,3 @@
-//By Kinuseka Do not redistribute
-
 var app = require('./app'); 
 var Worker = require('./essentials/workers')
 const port = process.env.PORT || 3001;
