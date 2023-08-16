@@ -10,7 +10,7 @@ function fetchYouTubeVideoId(url) {
     try {
         parsedUrl = new URL(url);
     } catch(error) {
-        return error
+        return error;
     }
     let videoId = null;
   
