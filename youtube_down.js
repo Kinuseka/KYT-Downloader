@@ -82,7 +82,7 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         response.AccessDenied(res, msg={code: "You are not authorized"});
         return;
     } else if (req.session?.current_video !== formData.videoID) {
-        response.AccessDenied(res, msg={code: "You are not authorized"});
+        response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"});
         return;
     }
     let selectedVideo = req.session.video_format.filter((element)=>{
@@ -123,7 +123,10 @@ router.post("/fetch_video", expressSession, async (req,res)=>{
     req.session.current_video = video_id;
     if (!video_id) {
         response.SendNotFound(res,msg={code: "ID not found/invalid"});
-        return
+        return;
+    } else if (video_id?.message) {
+        response.SendNotFound(res,msg={code: video_id.message});
+        return;
     }
     try {
         let info = await ytdl.getInfo(video_id);

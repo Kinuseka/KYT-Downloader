@@ -6,7 +6,12 @@ function fetchYouTubeVideoId(url) {
     if (!(/(www\.)?youtube\.com|youtu\.be/).test(url)) {
         return false;
     }
-    const parsedUrl = new URL(url);
+    var parsedUrl;
+    try {
+        parsedUrl = new URL(url);
+    } catch(error) {
+        return error
+    }
     let videoId = null;
   
     const hostname = parsedUrl.hostname.replace('www.', ''); // Remove "www" subdomain if present
