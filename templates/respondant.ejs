@@ -14,6 +14,11 @@
    <div class="info_msg"></div>
    <h3 style="color:#a4a4a4">Available quality:</h3>
       <ul id="parent-list">
+         <li id="child-list">
+            Audio (.mp3)
+               <br>
+               <button type="submit" class="downloadButton" name="qualbutton" value='{"audioonly": true, "videoID","<%= video_details.videoId%>"}'>Download</button>
+         </li>
          <% video_format.forEach((element)=>{%>
             <li id="child-list">
                <%=element.qualityLabel%> (<%=element.width%>x<%=element.height%>)

@@ -11,7 +11,7 @@ const config_file = require('./config.json')
 const response = require("./essentials/responses").Responses;
 const { fetchYouTubeVideoId, Sortvideo, SortAudio, FetchtoBase, formatTime} = require("./essentials/parser");
 const { verifyToken, createToken } = require("./essentials/authentication");
-const { VideoProcess, cleanCache, VideoFileIfAvail } = require("./essentials/videoProcessor");
+const { AudioProcess, VideoProcess, cleanCache, VideoFileIfAvail } = require("./essentials/videoProcessor");
 
 //Constant variables
 const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
@@ -96,6 +96,9 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
     //Video Promise based response
     await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedVideo.contentLength), path.resolve(dir)));
     var tokenData = {quality: itag, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title, contentLength: parseInt(selectedVideo.contentLength)}, audio: req.session.audio}
+    if (formData?.audioonly) {
+        return 
+    }
     VideoProcess(videoID, itag, {contentLength: parseInt(selectedVideo.contentLength)}, req.session.audio).then(succ=>{
         if (succ?.result === 1){
             console.log('[KYT Downloader] The video is now on queue');
