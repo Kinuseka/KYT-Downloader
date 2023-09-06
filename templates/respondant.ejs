@@ -17,7 +17,8 @@
          <li id="child-list">
             Audio (.mp3)
                <br>
-               <button type="submit" class="downloadButton" name="qualbutton" value='{"audioonly": true, "videoID","<%= video_details.videoId%>"}'>Download</button>
+               <button type="submit" class="downloadButton" name="qualbutton" 
+               value='{"audioonly": true, "videoID": "<%= video_details.videoId%>"}'>Download</button>
          </li>
          <% video_format.forEach((element)=>{%>
             <li id="child-list">

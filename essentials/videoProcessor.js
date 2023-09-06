@@ -173,4 +173,4 @@ function PerformisePiper(target, callback, size=null, ...args) {
         })
       })
     }
-module.exports = {VideoProcess, cleanCache, PerformisePiper, videoFetch, audioFetch, GetJobFromID, VideoFileIfAvail}
+module.exports = {AudioProcess, VideoProcess, cleanCache, PerformisePiper, videoFetch, audioFetch, GetJobFromID, VideoFileIfAvail}

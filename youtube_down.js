@@ -51,6 +51,20 @@ router.get("/video", (req,res)=>{
 
 router.get("/video/dllink", verifyToken, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
+    if (req.payload?.audioonly){
+        var aquality = req.payload.audio.highestPossible;
+        var videoTitle = req.payload.meta.videoTitle;
+        var videoID = req.payload.video;
+        var fileName = aquality+videoID+'.mp3';
+        var fileDir = path.join(dir, fileName);
+        console.log(`[KYT Downloader] Found audio only for ${aquality} for ID ${videoID}`);
+        let audioFile = await VideoFileIfAvail(fileDir);
+        if (audioFile){
+            res.setHeader('Content-Disposition', contentDisposition(`${videoTitle}.mp3`));
+            res.sendFile(audioFile,maxAge=3600);
+        }
+        return;
+    }
     var quality = req.payload.quality;
     var videoID= req.payload.video;
     var videoTitle = req.payload.meta.videoTitle;
@@ -85,6 +99,27 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"});
         return;
     }
+    if (formData?.audioonly) {
+        var tokenData = {audioonly: true, audio: req.session.audio, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title}}
+        AudioProcess(VideoID, req.session.audio).then(succ=>{
+            if (succ?.result === 1){
+                console.log('[KYT Downloader] The audio is now on queue');
+                res.json({"code": "queued"})
+            } else if (succ?.result === 2){
+                res.json({"code": "processing", status: succ.status})
+            } else if (succ?.result === 3){
+                console.log('[KYT Downloader] Job done successfully, send token');
+                let token = createToken(tokenData,"4h");
+                res.json({token:token})
+            } else {
+                res.json({"code": "Unknown response, this might be a bug"})
+            }
+        }).catch(err => {
+            console.log(err);
+            response.InternalError(res, msg={code: "Something went wrong (Prom_err)"});
+        });
+        return;
+    }
     let selectedVideo = req.session.video_format.filter((element)=>{
         return element.itag === itag; 
     })[0];
@@ -96,9 +131,6 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
     //Video Promise based response
     await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedVideo.contentLength), path.resolve(dir)));
     var tokenData = {quality: itag, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title, contentLength: parseInt(selectedVideo.contentLength)}, audio: req.session.audio}
-    if (formData?.audioonly) {
-        return 
-    }
     VideoProcess(videoID, itag, {contentLength: parseInt(selectedVideo.contentLength)}, req.session.audio).then(succ=>{
         if (succ?.result === 1){
             console.log('[KYT Downloader] The video is now on queue');
