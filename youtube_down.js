@@ -101,7 +101,7 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
     }
     if (formData?.audioonly) {
         var tokenData = {audioonly: true, audio: req.session.audio, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title}}
-        AudioProcess(VideoID, req.session.audio).then(succ=>{
+        AudioProcess(videoID, req.session.audio).then(succ=>{
             if (succ?.result === 1){
                 console.log('[KYT Downloader] The audio is now on queue');
                 res.json({"code": "queued"})
