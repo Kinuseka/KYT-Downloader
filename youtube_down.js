@@ -90,8 +90,8 @@ router.get("/video/dllink", verifyToken, async (req,res)=>{
 router.post("/fetch_token", expressSession, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
     const formData = req.body;
-    var itag = parseInt(formData.itag);
     var videoID = formData.videoID;
+    console.log(formData.audioonly)
     if (!req.session?.allowed){
         response.AccessDenied(res, msg={code: "You are not authorized"});
         return;
@@ -120,6 +120,7 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         });
         return;
     }
+    var itag = parseInt(formData.itag);
     let selectedVideo = req.session.video_format.filter((element)=>{
         return element.itag === itag; 
     })[0];

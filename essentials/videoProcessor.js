@@ -101,6 +101,8 @@ async function AudioProcess(VideoID, audio) {
     var FinalID = audio.highestPossible+VideoID;
     var assumedMP3 = `${FinalID}.mp3`;
     filemp3 = path.join(dir, assumedMP3);
+    fileDir = path.join(dir,assumedMP3);
+    fileDone = fileDir;
     //Same process but only audio
     let job = await CombineQueue.jobFind(FinalID);
     let jobstate = await job?.getState() || null;
@@ -111,6 +113,18 @@ async function AudioProcess(VideoID, audio) {
     } else if (jobstate == "failed") {
       console.log('[KYT-Processor] Existing job found but had failed', FinalID);
       let job = await CombineQueue.addProcess(Ident=FinalID, JobType="Audio", asize=audio.contentLength, VideoID, audio.highestPossible, fileDir, filemp3)
+    } else if (jobstate == "waiting") {
+      console.log('[KYT-VideoProcessor] Job is on queue', FinalID);
+      return {result: 1, fileDir: fileDir, filemp3: filemp3, fileDone: fileDone};
+    } 
+    var fileBytes = getFileBytes(fileDir);
+    if (fileBytes == audio.contentLength){
+      console.log('[KYT-VideoProcessor] File cache found for:', FinalID);
+      return {result: 3, fileDir: fileDir, filemp3: filemp3, fileDone: fileDone}
+    } else {
+      console.log("[KYT-VideoProcessor] File cache incomplete/not found, downloading")
+      ffmpipe = CombineQueue.restartProcess(Ident=FinalID, JobType="Audio", asize=audio.contentLength, VideoID, audio.highestPossible, fileDir, filemp3)
+      return {result: 1, fileDir: fileDir, filemp3: filemp3, fileDone: fileDone};
     }
 
 }
