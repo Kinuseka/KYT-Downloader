@@ -1,4 +1,4 @@
-const {Queue, Worker, Job, Job} = require('bullmq');
+const {Queue} = require('bullmq');
 const fs = require("fs");
 var config_file = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
