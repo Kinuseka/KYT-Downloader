@@ -1,9 +1,15 @@
-const {Worker} = require('bullmq');
+const {Worker, Job} = require('bullmq');
 const ffmpeg = require('fluent-ffmpeg');
 const {PerformisePiper, audioFetch, videoFetch} = require("./videoProcessor")
 const config_file = require('../config.json')
-
 async function WorkerHandler(Job) {
+    if (Job.name =="Audio") {
+        var {'0': asize, '1': VideoID, '2': audioItag, '3': fileDir, '4': filemp3} = Job.data;
+        Job.updateProgress({status: 'Collecting audio', progress: 0})
+        console.log("[Worker] Downloading audio only to server...");
+        let audios = await PerformisePiper(audioFetch, callback=percentageCallback, size=asize, VideoID, audioItag, filemp3);
+        return audios;
+    }
     function percentageCallback(resp) {
         let currprog = Job.progress;
         currprog.progress = resp.percentage;
