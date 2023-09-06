@@ -93,7 +93,7 @@ async function VideoProcess(VideoID, itag, meta, audio){
       return {result: 3, fileDir: fileDir, filemp3: filemp3, fileDone: fileDone}
     } else {
       console.log("[KYT-VideoProcessor] File cache incomplete/not found, downloading")
-      ffmpipe = CombineQueue.restartProcess(Ident=FinalID, JobType="Video", VideoID, itag, audio.highestPossible, fileDir, filemp3, fileDone);
+      ffmpipe = CombineQueue.restartProcess(Ident=FinalID, JobType="Video", vsize=meta.contentLength, asize=audio.contentLength, VideoID, itag, audio.highestPossible, fileDir, filemp3, fileDone);
       return {result: 1, fileDir: fileDir, filemp3: filemp3, fileDone: fileDone};
     }
 }
