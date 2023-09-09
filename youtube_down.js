@@ -106,15 +106,15 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         })[0];
     })()
     if (!selectedContent){ response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"}); return;}
-    else if (parseInt(selectedContent.contentLength) > MAX_FILE) {
-        response.AccessDenied(res, msg={code: `Audio too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
-        return;
-    }
-    else if (parseInt(selectedContent.contentLength)+ parseInt(req.session.audio.contentLength) > MAX_FILE && !formData.audioonly){
+    else if (parseInt(selectedContent.contentLength)+ parseInt(req.session.audio.contentLength) > MAX_FILE && !formData?.audioonly){
         response.AccessDenied(res, msg={code: `Video too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
         return;
     }
-    await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedContent.contentLength), path.resolve(dir)));
+    else if (parseInt(selectedContent.contentLength) > MAX_FILE && formData?.audioonly) {
+        response.AccessDenied(res, msg={code: `Audio too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
+        return;
+    }
+    await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedContent.contentLength), path.resolve(dir), ignore=[itag+videoID]));
     if (formData?.audioonly) {
         var tokenData = {audioonly: true, audio: req.session.audio, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title}}
         AudioProcess(videoID, req.session.audio).then(succ=>{

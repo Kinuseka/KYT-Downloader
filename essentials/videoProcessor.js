@@ -20,11 +20,10 @@ function getFileBytes(filename) {
   }
 }
 
-async function cleanCache(newFileSize, cacheDirectory) {
+async function cleanCache(newFileSize, cacheDirectory, ignore = []) {
     var maxCacheSize = MAX_CACHE;
     const files = await fs.promises.readdir(cacheDirectory);
     let cacheSize = 0;
-  
     // Calculate the total size of files in the cache
     for (const file of files) {
       const filePath = path.join(cacheDirectory, file);
@@ -36,24 +35,25 @@ async function cleanCache(newFileSize, cacheDirectory) {
         console.log(maxCacheSize)
       // Sort the files in the cache by their access time (oldest first)
       const filesToClean = files
-        .map((file) => ({
+        .map((file) => ({  
           filePath: path.join(cacheDirectory, file),
+          baseFileName: path.basename(file, path.extname(file)),
           accessTime: fs.statSync(path.join(cacheDirectory, file)).birthtimeMs,
         }))
         .sort((a, b) => a.accessTime - b.accessTime);
-  
       let cleanedSize = 0;
       let i = 0;
-  
       // Remove the oldest files until the cache size is within the limit
       while (cleanedSize < cacheSize + newFileSize - maxCacheSize && i < filesToClean.length) {
-        const { filePath } = filesToClean[i];
+        const { filePath, baseFileName } = filesToClean[i];
         const stats = await fs.promises.stat(filePath);
-  
-        // Delete the file from the cache
-        await fs.promises.unlink(filePath);
-
-        cleanedSize += stats.size;
+        console.log(baseFileName)
+        if (!ignore.includes(baseFileName)) {
+          const stats = await fs.promises.stat(filePath);
+          // Delete the file from the cache
+          await fs.promises.unlink(filePath);
+          cleanedSize += stats.size;
+        }
         i++;
       }
       if (cleanedSize !== 0){
