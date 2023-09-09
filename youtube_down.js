@@ -91,7 +91,6 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
     const formData = req.body;
     var videoID = formData.videoID;
-    console.log(formData.audioonly)
     if (!req.session?.allowed){
         response.AccessDenied(res, msg={code: "You are not authorized"});
         return;
@@ -99,6 +98,23 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"});
         return;
     }
+    var itag = parseInt(formData?.itag || req.session.audio.highestPossible);
+    let selectedContent = (()=>{
+        if (formData?.audioonly){return req.session.audio_format}
+        return req.session.video_format.filter((element)=>{
+            return element.itag === itag;
+        })[0];
+    })()
+    if (!selectedContent){ response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"}); return;}
+    else if (parseInt(selectedContent.contentLength) > MAX_FILE) {
+        response.AccessDenied(res, msg={code: `Audio too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
+        return;
+    }
+    else if (parseInt(selectedContent.contentLength)+ parseInt(req.session.audio.contentLength) > MAX_FILE && !formData.audioonly){
+        response.AccessDenied(res, msg={code: `Video too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
+        return;
+    }
+    await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedContent.contentLength), path.resolve(dir)));
     if (formData?.audioonly) {
         var tokenData = {audioonly: true, audio: req.session.audio, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title}}
         AudioProcess(videoID, req.session.audio).then(succ=>{
@@ -120,19 +136,9 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         });
         return;
     }
-    var itag = parseInt(formData.itag);
-    let selectedVideo = req.session.video_format.filter((element)=>{
-        return element.itag === itag; 
-    })[0];
-    if (!selectedVideo){ response.AccessDenied(res, msg={code: "An internal conflict was detected, refresh your browser"}); return;}
-    else if (parseInt(selectedVideo.contentLength)+ parseInt(req.session.audio.contentLength) > MAX_FILE){
-        response.AccessDenied(res, msg={code: `Video too big ${toMB(parseInt(selectedVideo.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
-        return;
-    }
     //Video Promise based response
-    await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedVideo.contentLength), path.resolve(dir)));
-    var tokenData = {quality: itag, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title, contentLength: parseInt(selectedVideo.contentLength)}, audio: req.session.audio}
-    VideoProcess(videoID, itag, {contentLength: parseInt(selectedVideo.contentLength)}, req.session.audio).then(succ=>{
+    var tokenData = {quality: itag, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title, contentLength: parseInt(selectedContent.contentLength)}, audio: req.session.audio}
+    VideoProcess(videoID, itag, {contentLength: parseInt(selectedContent.contentLength)}, req.session.audio).then(succ=>{
         if (succ?.result === 1){
             console.log('[KYT Downloader] The video is now on queue');
             res.json({"code": "queued"})
@@ -176,6 +182,7 @@ router.post("/fetch_video", expressSession, async (req,res)=>{
         // console.log(video_format);
         req.session.info = info;
         req.session.video_format = video_format;
+        req.session.audio_format = audio_format;
         req.session.allowed = true;
         req.session.audio = {
             highestPossible: audio_format.itag,

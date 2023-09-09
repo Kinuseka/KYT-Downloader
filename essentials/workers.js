@@ -20,12 +20,12 @@ async function WorkerHandler(Job) {
     console.log(VideoID, itag, audioItag, fileDir, filemp3, fileDone)
     Job.updateProgress({status:'Collecting audio', progress: 0})
     console.log("[Worker] Downloading audio to server... ", Job.id);
-    let audios = await PerformisePiper(audioFetch, callback=percentageCallback, size = asize, VideoID, audioItag, filemp3);
+    var audios = await PerformisePiper(audioFetch, callback=percentageCallback, size = asize, VideoID, audioItag, filemp3);
     Job.updateProgress({status:'Collecting video', progress: 0})
     console.log("[Worker] Downloading video to server... ", Job.id);
-    let video = await PerformisePiper(videoFetch, callback=percentageCallback, size = vsize, VideoID, itag, fileDir);
+    var video = await PerformisePiper(videoFetch, callback=percentageCallback, size = vsize, VideoID, itag, fileDir);
     console.log("[Worker] Combining audio and video ", Job.id);
-    let ffmpipe = ffmpeg()
+    var ffmpipe = ffmpeg()
     .input(fileDir)
     .input(filemp3)
     .videoCodec("copy")

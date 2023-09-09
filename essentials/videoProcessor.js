@@ -157,10 +157,10 @@ function audioFetch(VideoID, itag, saveto){
 
 function PerformisePiper(target, callback, size=null, ...args) {
   return new Promise((resolve,reject)=>{
-        const pipe = target(...args);
+        var pipe = target(...args);
         var totalSize = size || 0;
         var dataRead = 0;
-        var totalTime;
+        var totalTime = 0;
         pipe.on('response', resp=>{
           resp.on('data', function(data) {
             dataRead += data.length;
@@ -168,17 +168,19 @@ function PerformisePiper(target, callback, size=null, ...args) {
             callback({percentage: percent});
           });
         })
-        pipe.on('codecData', data => {
-          totalTime = parseInt(data.duration.replace(/:/g, ''));
-       })
-        pipe.on('progress', resp=> {
+        if (size) { 
+          pipe.on('codecData', data => {
+            totalTime = parseInt(data.duration.replace(/:/g, ''));
+          })
+          pipe.on('progress', resp => {
           if (resp?.timemark){
             const time = parseInt(resp.timemark.replace(/:/g, ''))
-             // AND HERE IS THE CALCULATION
+            // AND HERE IS THE CALCULATION
             var percentage = ((time / totalTime) * 100).toFixed(2)
             callback({percentage: percentage});
           }
         });
+      }
         pipe.on('end', ()=>{
           resolve(true);
         })
