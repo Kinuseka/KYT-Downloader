@@ -114,7 +114,9 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
         response.AccessDenied(res, msg={code: `Audio too big ${toMB(parseInt(selectedContent.contentLength)).toFixed(2)}MB/${toMB(MAX_FILE).toFixed(2)}MB`});
         return;
     }
-    await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(await cleanCache(parseInt(selectedContent.contentLength), path.resolve(dir), ignore=[itag+videoID]));
+    if (!req.session?.cleaned){
+        await (async (cleaned)=>{if (cleaned){console.log(`[KYT Downloader] Cleaned ${cleaned.toFixed(2)}MB from cache`)}})(req.session.cleaned = true;await cleanCache(parseInt(selectedContent.contentLength), path.resolve(dir), ignore=[itag+videoID, itag+videoID+"_audified"]));
+    }
     if (formData?.audioonly) {
         var tokenData = {audioonly: true, audio: req.session.audio, video: videoID, meta: {videoTitle: req.session.info.videoDetails.title}}
         AudioProcess(videoID, req.session.audio).then(succ=>{
