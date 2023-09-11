@@ -47,7 +47,6 @@ async function cleanCache(newFileSize, cacheDirectory, ignore = []) {
       while (cleanedSize < cacheSize + newFileSize - maxCacheSize && i < filesToClean.length) {
         const { filePath, baseFileName } = filesToClean[i];
         const stats = await fs.promises.stat(filePath);
-        console.log(baseFileName)
         if (!ignore.includes(baseFileName)) {
           const stats = await fs.promises.stat(filePath);
           // Delete the file from the cache
