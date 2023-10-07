@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    var URL = api_endpoint + "/fetch_video"
     $("form").submit(function(event) {
         event.preventDefault(); // Prevent the form from submitting normally
         // Get the input value
@@ -8,7 +9,7 @@ $(document).ready(function() {
             $(".Forms").text("Fetching details...")
             $(".redirect a").hide();
             $.ajax({
-                url: "/fetch_video", // Replace with your server URL
+                url: URL, // Replace with your server URL
                 type: "POST", // or "GET" depending on your server
                 data: { videoid: link },
                 success: function(response) {

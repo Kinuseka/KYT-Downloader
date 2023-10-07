@@ -31,11 +31,13 @@
       </ul>
 </div>
 <script>
+   var api_endpoint = "<%= API_ENDPOINT %>";
+   var URL_ENDPOINT = `/${api_endpoint}/fetch_token`
    var Done = false;
    function sendStatusReq(data, successCallback, errorCallback) {
       return new Promise((resolve, reject) => {
          $.ajax({
-            url: "/fetch_token",
+            url: URL_ENDPOINT,
             type: 'POST',
             data: data,
             success: (resp) => {
@@ -64,7 +66,7 @@
          $(".info_msg").show().text("Started download... it should be initiated by your browser");
          Done = true;
          let token = msg.token;
-         let target = `/video/dllink?sid=${token}`;
+         let target = `/<%= WEB_HOME %>/dllink?sid=${token}`;
          window.location = target;
       }
    }
@@ -81,7 +83,7 @@
          event.preventDefault();
          var jsonValue = JSON.parse($(this).val());
          $('.downloadButton').prop('disabled', true);
-         for (var i = 0; i < 90; i++) {
+         for (var i = 0; i < 120; i++) {
             if (Done) {
                $('.downloadButton').prop('disabled', false);
                return;
@@ -89,6 +91,8 @@
             await sendStatusReq(jsonValue, sendSuccessMsg, sendErrorMsg);
             await sleep(1500);
          }
+         $('.downloadButton').prop('disabled', false);
+         PopError("Timed out! Please try again.");
       });
    });
 </script>

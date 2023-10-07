@@ -19,7 +19,7 @@ const MAX_CACHE = config_file.Cache_size_GB/*gb*/ * (1024 * 1024 * 1024);
 const MAX_FILE = config_file.Maximum_size_GB/*gb*/ * (1024 * 1024 * 1024);
 const MAX_LENGTH = config_file.Longest_time_HR  /*HR*/ * (60*60);
 const fileKey = "ThisIsFile"; //Does not require secure string
-const {dir} = require('./constant')
+const {dir, WEB_HOME, WEB_API} = require('./constant')
 
 var expressSession = session({
     name: 'KYTDownloader',
@@ -42,14 +42,15 @@ var toMB = bytes => {return bytes / (1024 * 1024)}
 router.use("/static",express.static(path.join(__dirname,"public")));
 
 router.get("/",(req,res)=>{
-    res.redirect("/video");
+    res.redirect("/"+WEB_HOME);
 })
 
-router.get("/video", (req,res)=>{
+router.get(`/${WEB_HOME}`, (req,res)=>{
+    res.locals.API_ENDPOINT = WEB_API;
     res.render(path.join(__dirname,'templates','downloader'));
 });
 
-router.get("/video/dllink", verifyToken, async (req,res)=>{
+router.get(`/${WEB_HOME}/dllink`, verifyToken, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
     if (req.payload?.audioonly){
         var aquality = req.payload.audio.highestPossible;
@@ -87,7 +88,7 @@ router.get("/video/dllink", verifyToken, async (req,res)=>{
 
 });// finish this !!!!
 
-router.post("/fetch_token", expressSession, async (req,res)=>{
+router.post(`/${WEB_API}/fetch_token`, expressSession, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
     const formData = req.body;
     var videoID = formData.videoID;
@@ -157,7 +158,7 @@ router.post("/fetch_token", expressSession, async (req,res)=>{
     });
 });
 
-router.post("/fetch_video", expressSession, async (req,res)=>{
+router.post(`/${WEB_API}/fetch_video`, expressSession, async (req,res)=>{
     if (!fs.existsSync(dir)){fs.mkdirSync(dir);}
     const formData = req.body; // Access the submitted form data
     var video_id = fetchYouTubeVideoId(formData.videoid);
@@ -188,6 +189,9 @@ router.post("/fetch_video", expressSession, async (req,res)=>{
             highestPossible: audio_format.itag,
             contentLength: parseInt(audio_format.contentLength)
         }
+        //Render
+        res.locals.API_ENDPOINT = WEB_API;
+        res.locals.WEB_HOME = WEB_HOME;
         res.render(path.join(__dirname,'templates','respondant'), {thumbnail_b64: thumbnailb64, video_details: video_details, video_format: video_format, audio_format: audio_format});
     } catch(err) {
         var error_message = err.message;
