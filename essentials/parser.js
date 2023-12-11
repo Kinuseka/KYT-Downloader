@@ -31,10 +31,25 @@ function fetchYouTubeVideoId(url) {
     return videoId || false;
 }
 function Sortvideo(videos = []){
+    uniqueQualityIdentifier = {};
     let preferredVideos = videos.filter((element)=>{
-        return element.videoCodec === "vp9";
+        if (element.videoCodec === "vp9" || element.videoCodec.startsWith("avc1")){
+            let key = `${element.width}x${element.height}`;
+            console.log(key);
+            if (!uniqueQualityIdentifier[key]){
+                uniqueQualityIdentifier[key] = true;
+                return true;
+            }
+
+        }
+        return false;
+    });
+    let arrangedVideos = preferredVideos.sort((a,b)=>{
+        let qualityA = a.height;
+        let qualityB = b.height;
+        return qualityB - qualityA;
     })
-    return preferredVideos;
+    return arrangedVideos;
 }
 function SortAudio(audios = []){
     let preferredAudio = audios.filter(element=>{
