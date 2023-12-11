@@ -35,12 +35,10 @@ function Sortvideo(videos = []){
     let preferredVideos = videos.filter((element)=>{
         if (element.videoCodec === "vp9" || element.videoCodec.startsWith("avc1")){
             let key = `${element.width}x${element.height}`;
-            console.log(key);
             if (!uniqueQualityIdentifier[key]){
                 uniqueQualityIdentifier[key] = true;
                 return true;
             }
-
         }
         return false;
     });
